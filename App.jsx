@@ -5,11 +5,27 @@ import Confetti from "react-confetti";
 
 export default function App() {
   const [dice, setDice] = useState(() => generateAllNewDice());
+  const [windowSize, setWindowSize] = useState(() => ({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }));
   const buttonRef = useRef(null);
 
   const gameWon =
     dice.every((die) => die.isHeld) &&
     dice.every((die) => die.value === dice[0].value);
+
+  useEffect(() => {
+    function updateWindowSize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+
+    window.addEventListener("resize", updateWindowSize);
+    return () => window.removeEventListener("resize", updateWindowSize);
+  }, []);
 
   useEffect(() => {
     if (gameWon) {
@@ -56,7 +72,19 @@ export default function App() {
 
   return (
     <main>
-      {gameWon && <Confetti />}
+      {gameWon && (
+        <Confetti
+          width={windowSize.width}
+          height={windowSize.height}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            pointerEvents: "none",
+            zIndex: 1,
+          }}
+        />
+      )}
       <div aria-live="polite" className="sr-only">
         {gameWon && (
           <p>Congratulations! You won! Press "New Game" to start again.</p>
